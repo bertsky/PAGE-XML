@@ -348,8 +348,11 @@
 		<complexContent>
 		<extension base="pc:RegionType">
 			<sequence>
-				<element name="TextLine" type="pc:TextLineType"
-					 minOccurs="0" maxOccurs="unbounded"/>
+				<choice minOccurs="1" maxOccurs="1">
+					<element name="TextLine" type="pc:TextLineType"
+						 minOccurs="0" maxOccurs="unbounded"/>
+					<element name="TextSegmentLattice" type="pc:TextSegmentLatticeType"/>
+				</choice>
 				<element name="TextEquiv" type="pc:TextEquivType"
 					 minOccurs="0" maxOccurs="unbounded"/>
 				<element name="TextStyle" type="pc:TextStyleType"
@@ -487,9 +490,11 @@
 					</documentation>
 				</annotation>
 			</element>
-			<element name="Word" type="pc:WordType" minOccurs="0"
-				 maxOccurs="unbounded">
-			</element>
+			<choice minOccurs="1" maxOccurs="1">
+				<element name="Word" type="pc:WordType"
+					 minOccurs="0" maxOccurs="unbounded"/>
+				<element name="TextSegmentLattice" type="pc:TextSegmentLatticeType"/>
+			</choice>
 			<element name="TextEquiv" type="pc:TextEquivType"
 				 minOccurs="0" maxOccurs="unbounded">
 			</element>
@@ -573,9 +578,11 @@
 			</element>
 			<element name="Coords" type="pc:CoordsType">
 			</element>
-			<element name="Glyph" type="pc:GlyphType" minOccurs="0"
-				maxOccurs="unbounded">
-			</element>
+			<choice minOccurs="1" maxOccurs="1">
+				<element name="Glyph" type="pc:GlyphType"
+					 minOccurs="0" maxOccurs="unbounded"/>
+				<element name="TextSegmentLattice" type="pc:TextSegmentLatticeType"/>
+			</choice>
 			<element name="TextEquiv" type="pc:TextEquivType"
 				minOccurs="0" maxOccurs="unbounded">
 			</element>
@@ -2568,6 +2575,111 @@
 				</choice>
 			</extension>
 		</complexContent>
+	</complexType>
+
+	<complexType name="TextSegmentLatticeType">
+		<annotation>
+			<documentation>
+			Container for a lattice of alternative segmentations
+			for the containing TextRegion, TextLine, or Word element,
+			instead of a linear sequence of TextLine, Word, or Glyph,
+			respectively.
+			The nodes pointed to by the arcs must all exist,
+			there must not be cycles or partitions.
+			The lattice must have one initial and one final node.
+			Empty arcs (i.e. with a null TextEquiv/Unicode) are permitted.
+			White space (e.g. newline or space) should be made explicit.
+			</documentation>
+		</annotation>
+		<sequence>
+			<element name="TextSegmentNode" type="pc:TextSegmentNodeType"
+				 minOccurs="2" maxOccurs="unbounded"/>
+			<element name="TextSegmentArc" type="pc:TextSegmentArcType"
+				 minOccurs="1" maxOccurs="unbounded"/>
+		</sequence>
+		<attribute name="begin" type="IDREF" use="required">
+			<annotation>
+				<documentation>
+				The id of the TextSegmentNode to begin the lattice at.
+				</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="end" type="IDREF" use="required">
+			<annotation>
+				<documentation>
+				The id of the TextSegmentNode to end the lattice at.
+				</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+	<complexType name="TextSegmentNodeType">
+		<attribute name="id" type="ID" use="required"/>
+	</complexType>
+	<complexType name="TextSegmentArcType">
+		<sequence>
+			<element name="Coords" type="pc:CoordsType"/>
+			<element name="TextEquiv" type="pc:TextEquivType"
+				 minOccurs="0" maxOccurs="unbounded">
+			</element>
+			<element name="TextStyle" type="pc:TextStyleType"
+				 minOccurs="0">
+			</element>
+			<element name="UserDefined" type="pc:UserDefinedType"
+				 minOccurs="0" maxOccurs="1">
+			</element>
+			<element name="Labels" type="pc:LabelsType"
+				 minOccurs="0" maxOccurs="unbounded">
+				<annotation>
+					<documentation>Semantic labels / tags</documentation>
+				</annotation>
+			</element>
+		</sequence>
+		<attribute name="begin" type="IDREF" use="required">
+			<annotation>
+				<documentation>
+				The id of the TextSegmentNode to begin the arc at.
+				</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="end" type="IDREF" use="required">
+			<annotation>
+				<documentation>
+				The id of the TextSegmentNode to end the arc at.
+				</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="id" type="ID" use="required"/>
+		<attribute name="language" type="pc:LanguageSimpleType">
+			<annotation>
+				<documentation>
+				Overrides primaryLanguage attribute of parent line
+				and/or text region
+				</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="script" type="pc:ScriptSimpleType"/>
+		<attribute name="readingDirection" type="pc:ReadingDirectionSimpleType">
+			<annotation>
+				<documentation>
+				The direction in which text within the word
+				should be read (order of characters).
+				</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="production" type="pc:ProductionSimpleType">
+			<annotation>
+				<documentation>
+				Overrides the production attribute of the parent
+				text line and/or text region.
+				</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="custom" type="string">
+			<annotation>
+				<documentation>For generic use</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="comments" type="string"/>
 	</complexType>
 
 	<complexType name="UserDefinedType">
